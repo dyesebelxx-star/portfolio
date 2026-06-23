@@ -65,5 +65,26 @@ export async function uploadVideo(formData: FormData): Promise<{ url: string } |
 }
 
 export async function uploadCover(formData: FormData): Promise<{ url: string } | { error: string }> {
-  return uploadImage(formData); // Same logic, different directory
+  const session = await getSession();
+  if (!session) return { error: "未授权" };
+
+  const file = formData.get("file") as File;
+  if (!file) return { error: "未选择文件" };
+
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return { error: "不支持的图片格式" };
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    return { error: "图片大小不能超过 10MB" };
+  }
+
+  const ext = file.name.split(".").pop() || "jpg";
+  const filename = `${generateId()}.${ext}`;
+  const dir = join(process.cwd(), "public", "uploads", "covers");
+  await mkdir(dir, { recursive: true });
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  await writeFile(join(dir, filename), buffer);
+
+  return { url: `/uploads/covers/${filename}` };
 }

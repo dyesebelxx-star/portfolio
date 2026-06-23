@@ -19,7 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { createWork, updateWork } from "@/actions/work";
-import { uploadImage, uploadVideo } from "@/actions/upload";
+import { uploadImage, uploadVideo, uploadCover as uploadCoverAction } from "@/actions/upload";
 import type { Work, PromptItem, WorkflowStep, WorkSection, ImageItem } from "@/types";
 
 interface WorkFormProps {
@@ -101,6 +101,8 @@ export function WorkForm({ work }: WorkFormProps) {
       let result;
       if (type === "video") {
         result = await uploadVideo(formData);
+      } else if (type === "cover") {
+        result = await uploadCoverAction(formData);
       } else {
         result = await uploadImage(formData);
       }
