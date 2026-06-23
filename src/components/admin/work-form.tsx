@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { createWork, updateWork } from "@/actions/work";
 import { uploadImage, uploadVideo } from "@/actions/upload";
-import type { Work, PromptItem, WorkflowStep, WorkSection } from "@/types";
+import type { Work, PromptItem, WorkflowStep, WorkSection, ImageItem } from "@/types";
 
 interface WorkFormProps {
   work?: Work;
@@ -164,6 +164,71 @@ export function WorkForm({ work }: WorkFormProps) {
         i === index ? { ...s, hidden: !s.hidden } : s
       )
     );
+  }
+
+  // Image item operations inside a section
+  function addImage(sectionIndex: number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        return {
+          ...s,
+          images: [...s.images, { url: "", prompt: "" }],
+        };
+      })
+    );
+  }
+
+  function updateImage(sectionIndex: number, imageIndex: number, field: keyof ImageItem, value: string) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        const updated = [...s.images];
+        updated[imageIndex] = { ...updated[imageIndex], [field]: value };
+        return { ...s, images: updated };
+      })
+    );
+  }
+
+  function removeImage(sectionIndex: number, imageIndex: number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        return { ...s, images: s.images.filter((_, j) => j !== imageIndex) };
+      })
+    );
+  }
+
+  function moveImage(sectionIndex: number, imageIndex: number, direction: "up" | "down") {
+    const newIndex = direction === "up" ? imageIndex - 1 : imageIndex + 1;
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        if (newIndex < 0 || newIndex >= s.images.length) return s;
+        const updated = [...s.images];
+        [updated[imageIndex], updated[newIndex]] = [updated[newIndex], updated[imageIndex]];
+        return { ...s, images: updated };
+      })
+    );
+  }
+
+  async function handleImageUpload(sectionIndex: number, imageIndex: number, file: File) {
+    setUploading(`img_${sectionIndex}_${imageIndex}`);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const result = await uploadImage(formData);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        updateImage(sectionIndex, imageIndex, "url", result.url);
+        toast.success("上传成功");
+      }
+    } catch {
+      toast.error("上传失败");
+    } finally {
+      setUploading(null);
+    }
   }
 
   // Prompt operations inside a section
@@ -549,14 +614,95 @@ export function WorkForm({ work }: WorkFormProps) {
             )}
 
             {section.type === "images" && (
-              <Textarea
-                value={section.images.join("\n")}
-                onChange={(e) =>
-                  updateSection(i, "images", e.target.value.split("\n").filter(Boolean))
-                }
-                placeholder="每行一个图片URL..."
-                rows={4}
-              />
+              <div className="space-y-3">
+                {section.images.map((img, ii) => (
+                  <div
+                    key={ii}
+                    className="border border-border/40 rounded-lg p-3 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        图片 #{ii + 1}
+                      </span>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => moveImage(i, ii, "up")}
+                          disabled={ii === 0}
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => moveImage(i, ii, "down")}
+                          disabled={ii === section.images.length - 1}
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeImage(i, ii)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="图片 URL 或上传"
+                        value={img.url}
+                        onChange={(e) =>
+                          updateImage(i, ii, "url", e.target.value)
+                        }
+                        className="h-8 text-sm flex-1"
+                      />
+                      <label className="inline-flex items-center gap-1 px-3 py-0 rounded-md border border-border text-xs hover:bg-muted cursor-pointer shrink-0">
+                        {uploading === `img_${i}_${ii}` ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Upload className="h-3 w-3" />
+                        )}
+                        上传
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(i, ii, file);
+                          }}
+                        />
+                      </label>
+                    </div>
+                    <Textarea
+                      placeholder="图片对应的 Prompt（可选）"
+                      value={img.prompt}
+                      onChange={(e) =>
+                        updateImage(i, ii, "prompt", e.target.value)
+                      }
+                      rows={2}
+                      className="text-sm font-mono"
+                    />
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addImage(i)}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> 添加图片
+                </Button>
+              </div>
             )}
 
             {section.type === "prompts" && (
