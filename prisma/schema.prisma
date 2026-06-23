@@ -36,3 +36,8 @@ model Admin {
   username     String @unique
   passwordHash String
 }
+
+model SiteConfig {
+  key   String @id
+  value String @default("")
+}

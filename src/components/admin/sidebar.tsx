@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileVideo, Plus, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, FileVideo, Plus, Settings, LogOut, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "仪表盘", icon: LayoutDashboard },
   { href: "/admin/works", label: "作品管理", icon: FileVideo },
   { href: "/admin/works/new", label: "新增作品", icon: Plus },
+  { href: "/admin/settings", label: "网站设置", icon: Settings },
 ];
 
 export function AdminSidebar() {

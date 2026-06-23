@@ -5,13 +5,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { getManySiteConfigs } from "@/actions/site-config";
 
 export const metadata: Metadata = {
   title: "联系方式",
   description: "联系AI内容创作者，探讨合作机会或交流AI创作经验。",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const configs = await getManySiteConfigs([
+    "contact_email",
+    "contact_location",
+    "contact_github",
+    "contact_twitter",
+  ]);
+
+  const email = configs.contact_email || "hello@example.com";
+  const location = configs.contact_location || "中国 · 北京";
+  const github = configs.contact_github || "https://github.com";
+  const twitter = configs.contact_twitter || "https://twitter.com";
+
   return (
     <div className="container-narrow py-16 sm:py-20">
       <div className="text-center mb-12">
@@ -29,13 +42,13 @@ export default function ContactPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-3 text-muted-foreground">
               <Mail className="h-5 w-5 text-primary" />
-              <span>hello@example.com</span>
+              <span>{email}</span>
             </div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-3 text-muted-foreground">
               <MapPin className="h-5 w-5 text-primary" />
-              <span>中国 · 北京</span>
+              <span>{location}</span>
             </div>
           </div>
 
@@ -45,7 +58,7 @@ export default function ContactPage() {
             <h3 className="font-medium mb-3">社交媒体</h3>
             <div className="flex gap-3">
               <a
-                href="https://github.com"
+                href={github}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
@@ -53,7 +66,7 @@ export default function ContactPage() {
                 <Globe className="h-4 w-4" />
               </a>
               <a
-                href="https://twitter.com"
+                href={twitter}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
@@ -66,10 +79,7 @@ export default function ContactPage() {
 
         {/* Contact Form */}
         <div className="md:col-span-3">
-          <form
-            className="space-y-5 bg-card border border-border/60 rounded-2xl p-6 sm:p-8"
-            // Form submits to nowhere for now - can integrate with email service later
-          >
+          <form className="space-y-5 bg-card border border-border/60 rounded-2xl p-6 sm:p-8">
             <div className="space-y-2">
               <Label htmlFor="name">姓名</Label>
               <Input id="name" placeholder="您的姓名" required />

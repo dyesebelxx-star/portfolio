@@ -1,4 +1,6 @@
 import { Wand2, Users, Building2, GitBranch } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { getManySiteConfigs } from "@/actions/site-config";
 
 const CAPABILITIES = [
   {
@@ -27,7 +29,10 @@ const CAPABILITIES = [
   },
 ];
 
-export function Capabilities() {
+export async function Capabilities() {
+  const configs = await getManySiteConfigs(["skills"]);
+  const skills: string[] = JSON.parse(configs.skills || "[]");
+
   return (
     <section className="py-20 sm:py-28">
       <div className="container-page">
@@ -40,7 +45,7 @@ export function Capabilities() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {CAPABILITIES.map((cap) => (
             <div
               key={cap.title}
@@ -56,6 +61,21 @@ export function Capabilities() {
             </div>
           ))}
         </div>
+
+        {skills.length > 0 && (
+          <div className="text-center">
+            <h3 className="text-sm font-medium text-muted-foreground mb-4">
+              常用工具与技术
+            </h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {skills.map((skill) => (
+                <Badge key={skill} variant="secondary" className="text-sm py-1.5 px-3">
+                  {skill}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -13,7 +13,9 @@ export default function HomePage() {
         <FeaturedWorks />
       </Suspense>
       <CategoryNav />
-      <Capabilities />
+      <Suspense fallback={<div className="py-20" />}>
+        <Capabilities />
+      </Suspense>
       <ContactCTA />
     </>
   );
