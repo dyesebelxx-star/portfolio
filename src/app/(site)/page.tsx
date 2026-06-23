@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/home/hero-section";
 import { FeaturedWorks } from "@/components/home/featured-works";
 import { CategoryNav } from "@/components/home/category-nav";
 import { Capabilities } from "@/components/home/capabilities";
-import { ContactCTA } from "@/components/home/contact-cta";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +19,6 @@ export default function HomePage() {
       <Suspense fallback={<div className="py-20" />}>
         <Capabilities />
       </Suspense>
-      <ContactCTA />
     </>
   );
 }
