@@ -191,17 +191,34 @@ async function main() {
 
   // Seed site config
   const siteConfigs: Record<string, string> = {
-    about_bio: JSON.stringify([
-      "我是一名专注于 AI 驱动内容创作的独立创作者。从 2023 年开始，我深度探索了 Midjourney、Stable Diffusion、Runway、Pika 等前沿 AI 工具，并将它们融入到完整的创意工作流中。",
-      "我的核心优势在于 **Prompt 工程**——通过精细化的 Prompt 设计，我能精确控制 AI 的输出质量、风格和一致性。这使得我能够在人物设计、场景构建和视频生成等领域交付专业级的作品。",
-      "我特别热衷于 AI 在叙事型内容中的应用，如 AI 短剧和 AI 恋综项目。我相信 AI 不是要取代创意，而是要放大每个人的创作能力。"
+    about_sections: JSON.stringify([
+      {
+        id: "bio",
+        title: "个人简介",
+        type: "paragraphs",
+        items: [
+          "我是一名专注于 AI 驱动内容创作的独立创作者。从 2023 年开始，我深度探索了 Midjourney、Stable Diffusion、Runway、Pika 等前沿 AI 工具，并将它们融入到完整的创意工作流中。",
+          "我的核心优势在于 **Prompt 工程**——通过精细化的 Prompt 设计，我能精确控制 AI 的输出质量、风格和一致性。这使得我能够在人物设计、场景构建和视频生成等领域交付专业级的作品。",
+          "我特别热衷于 AI 在叙事型内容中的应用，如 AI 短剧和 AI 恋综项目。我相信 AI 不是要取代创意，而是要放大每个人的创作能力。"
+        ]
+      },
+      {
+        id: "experience",
+        title: "创作历程",
+        type: "timeline",
+        items: [
+          { year: "2025 — 至今", title: "独立 AI 内容创作者", description: "专注 AI 视频和图像创作，完成多个 AI 短剧和恋综项目，积累丰富的 Prompt 工程经验。" },
+          { year: "2024 — 2025", title: "AI 创意探索期", description: "系统学习 AI 图像和视频生成工具，建立了完整的 Prompt 工程方法论，开始创作实验性 AI 作品。" },
+          { year: "2023 — 2024", title: "内容创作起步", description: "开始接触 AI 工具，探索 AI 在内容创作领域的可能性。" }
+        ]
+      },
+      {
+        id: "philosophy",
+        title: "创作理念",
+        type: "quote",
+        items: ["AI 是画笔，Prompt 是颜料，而真正的艺术创作来自人类的想象力和审美判断。我致力于在人与 AI 之间找到最佳的协作方式，创造出既高效又有灵魂的作品。"]
+      }
     ]),
-    about_experiences: JSON.stringify([
-      { year: "2025 — 至今", title: "独立 AI 内容创作者", description: "专注 AI 视频和图像创作，完成多个 AI 短剧和恋综项目，积累丰富的 Prompt 工程经验。" },
-      { year: "2024 — 2025", title: "AI 创意探索期", description: "系统学习 AI 图像和视频生成工具，建立了完整的 Prompt 工程方法论，开始创作实验性 AI 作品。" },
-      { year: "2023 — 2024", title: "内容创作起步", description: "开始接触 AI 工具，探索 AI 在内容创作领域的可能性。" }
-    ]),
-    about_philosophy: "AI 是画笔，Prompt 是颜料，而真正的艺术创作来自人类的想象力和审美判断。我致力于在人与 AI 之间找到最佳的协作方式，创造出既高效又有灵魂的作品。",
     skills: JSON.stringify([
       "Midjourney", "Stable Diffusion", "ComfyUI", "DALL·E 3",
       "Runway Gen-2", "Pika Labs", "ElevenLabs", "Suno AI",

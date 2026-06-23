@@ -36,10 +36,10 @@ export function HeroSection() {
             查看作品 <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
           <Link
-            href="/contact"
+            href="/admin/login"
             className={cn(buttonVariants({ variant: "outline", size: "lg" }), "rounded-full px-8")}
           >
-            联系我
+            管理
           </Link>
         </div>
       </div>

@@ -14,7 +14,6 @@ const NAV_ITEMS = [
   { href: "/works", label: "作品" },
   { href: "/prompts", label: "Prompt 库" },
   { href: "/about", label: "关于" },
-  { href: "/contact", label: "联系" },
 ];
 
 export function Header() {
