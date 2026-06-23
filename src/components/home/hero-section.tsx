@@ -22,18 +22,12 @@ export function HeroSection() {
         </div>
 
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
-          AI 内容创作者
+          罗欣欣的作品集
         </h1>
 
-        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed">
-          专注于 AI 驱动的视觉内容创作
+        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+          业余ai内容创作者
         </p>
-        <p className="text-base text-muted-foreground/70 max-w-xl mx-auto mb-10 leading-relaxed">
-          从 Prompt 工程到视频制作，从人物设计到完整项目流程
-          <br className="hidden sm:block" />
-          用 AI 工具将创意转化为令人惊叹的作品
-        </p>
-
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/works"
