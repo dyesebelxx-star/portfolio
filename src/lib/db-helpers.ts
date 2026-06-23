@@ -1,4 +1,4 @@
-import type { Work, WorkFormData, ImageItem } from "@/types";
+import type { Work, WorkFormData, ImageItem, WorkSection } from "@/types";
 import type { Work as PrismaWork } from "@prisma/client";
 
 /**
@@ -13,7 +13,7 @@ export function dbWorkToWork(db: PrismaWork): Work {
     images: parseImageArray(db.images),
     prompts: parseJsonArray(db.prompts),
     workflow: parseJsonArray(db.workflow),
-    sections: parseSections(db.sections),
+    sections: parseSections(db.sections) as WorkSection[],
     videoUrl: db.videoUrl || null,
   };
 }
