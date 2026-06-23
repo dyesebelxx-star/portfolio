@@ -8,7 +8,9 @@ import { ContactCTA } from "@/components/home/contact-cta";
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
+      <Suspense fallback={<div className="py-24" />}>
+        <HeroSection />
+      </Suspense>
       <Suspense fallback={<FeaturedWorksFallback />}>
         <FeaturedWorks />
       </Suspense>

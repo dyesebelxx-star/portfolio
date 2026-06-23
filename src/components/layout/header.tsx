@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "首页" },
+  { href: "/about", label: "关于" },
   { href: "/works", label: "作品" },
   { href: "/prompts", label: "Prompt 库" },
-  { href: "/about", label: "关于" },
 ];
 
 export function Header() {
