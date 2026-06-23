@@ -25,6 +25,7 @@ model Work {
   prompts     String   @default("[]") // JSON array — PromptItem[]
   workflow    String   @default("[]") // JSON array — WorkflowStep[]
   summary     String   @default("")
+  sections    String   @default("[]") // JSON — WorkSection[]
   featured    Boolean  @default(false)
   published   Boolean  @default(false)
   createdAt   DateTime @default(now())

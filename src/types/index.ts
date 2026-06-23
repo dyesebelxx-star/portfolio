@@ -2,6 +2,18 @@ export type WorkType = "video" | "image";
 
 export type WorkCategory = string;
 
+export interface WorkSection {
+  id: string;
+  title: string;
+  type: "markdown" | "images" | "prompts" | "steps";
+  content: string;
+  images: string[];
+  prompts: PromptItem[];
+  steps: WorkflowStep[];
+  order: number;
+  hidden: boolean;
+}
+
 export interface PromptItem {
   title: string;
   content: string;
@@ -31,6 +43,7 @@ export interface Work {
   prompts: PromptItem[];
   workflow: WorkflowStep[];
   summary: string;
+  sections: WorkSection[];
   featured: boolean;
   published: boolean;
   createdAt: Date;

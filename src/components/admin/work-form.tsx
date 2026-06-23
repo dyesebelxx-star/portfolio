@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, ArrowUp, ArrowDown, Loader2, Upload } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Loader2, Upload, GripVertical, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,10 +19,35 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { createWork, updateWork } from "@/actions/work";
 import { uploadImage, uploadVideo } from "@/actions/upload";
-import type { Work, PromptItem, WorkflowStep } from "@/types";
+import type { Work, PromptItem, WorkflowStep, WorkSection } from "@/types";
 
 interface WorkFormProps {
   work?: Work;
+}
+
+const SECTION_TYPES = [
+  { value: "markdown", label: "富文本" },
+  { value: "images", label: "图片集" },
+  { value: "prompts", label: "Prompt 列表" },
+  { value: "steps", label: "步骤流程" },
+];
+
+function makeSectionId() {
+  return `sec_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function emptySection(type: WorkSection["type"], order: number): WorkSection {
+  return {
+    id: makeSectionId(),
+    title: "",
+    type,
+    content: "",
+    images: [],
+    prompts: [],
+    steps: [],
+    order,
+    hidden: false,
+  };
 }
 
 export function WorkForm({ work }: WorkFormProps) {
@@ -35,23 +60,21 @@ export function WorkForm({ work }: WorkFormProps) {
     title: work?.title || "",
     slug: work?.slug || "",
     type: work?.type || "image",
-    category: work?.category || "其他",
+    category: work?.category || "",
     tags: work?.tags?.join(", ") || "",
     coverImage: work?.coverImage || "",
     description: work?.description || "",
-    content: work?.content || "",
-    images: work?.images || [],
     videoUrl: work?.videoUrl || "",
-    summary: work?.summary || "",
     featured: work?.featured || false,
     published: work?.published || false,
   });
 
-  const [prompts, setPrompts] = useState<PromptItem[]>(
-    work?.prompts || []
-  );
-  const [workflow, setWorkflow] = useState<WorkflowStep[]>(
-    work?.workflow || []
+  const [sections, setSections] = useState<WorkSection[]>(
+    work?.sections && work.sections.length > 0
+      ? work.sections
+      : work
+        ? legacyToSections(work)
+        : []
   );
 
   function updateField(field: string, value: string | boolean | string[] | null) {
@@ -98,45 +121,135 @@ export function WorkForm({ work }: WorkFormProps) {
     }
   }
 
-  function addPrompt() {
-    setPrompts([...prompts, { title: "", content: "", model: "", notes: "" }]);
-  }
-
-  function updatePrompt(index: number, field: keyof PromptItem, value: string) {
-    const updated = [...prompts];
-    updated[index] = { ...updated[index], [field]: value };
-    setPrompts(updated);
-  }
-
-  function removePrompt(index: number) {
-    setPrompts(prompts.filter((_, i) => i !== index));
-  }
-
-  function addStep() {
-    setWorkflow([
-      ...workflow,
-      { order: workflow.length + 1, title: "", description: "" },
+  // Section operations
+  function addSection(type: WorkSection["type"]) {
+    setSections((prev) => [
+      ...prev,
+      emptySection(type, prev.length),
     ]);
   }
 
-  function updateStep(index: number, field: keyof WorkflowStep, value: string | number) {
-    const updated = [...workflow];
-    updated[index] = { ...updated[index], [field]: value as never };
-    setWorkflow(updated);
+  function removeSection(index: number) {
+    setSections((prev) =>
+      prev.filter((_, i) => i !== index).map((s, i) => ({ ...s, order: i }))
+    );
   }
 
-  function removeStep(index: number) {
-    const updated = workflow.filter((_, i) => i !== index);
-    // Re-index
-    setWorkflow(updated.map((s, i) => ({ ...s, order: i + 1 })));
-  }
-
-  function moveStep(index: number, direction: "up" | "down") {
+  function moveSection(index: number, direction: "up" | "down") {
     const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= workflow.length) return;
-    const updated = [...workflow];
-    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-    setWorkflow(updated.map((s, i) => ({ ...s, order: i + 1 })));
+    if (newIndex < 0 || newIndex >= sections.length) return;
+    setSections((prev) => {
+      const updated = [...prev];
+      [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+      return updated.map((s, i) => ({ ...s, order: i }));
+    });
+  }
+
+  function updateSection(index: number, field: keyof WorkSection, value: unknown) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== index) return s;
+        // If type changed, reset content fields
+        if (field === "type" && value !== s.type) {
+          return emptySection(value as WorkSection["type"], s.order);
+        }
+        return { ...s, [field]: value };
+      })
+    );
+  }
+
+  function toggleSectionHidden(index: number) {
+    setSections((prev) =>
+      prev.map((s, i) =>
+        i === index ? { ...s, hidden: !s.hidden } : s
+      )
+    );
+  }
+
+  // Prompt operations inside a section
+  function addPrompt(sectionIndex: number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        return {
+          ...s,
+          prompts: [...s.prompts, { title: "", content: "", model: "", notes: "" }],
+        };
+      })
+    );
+  }
+
+  function updatePrompt(sectionIndex: number, promptIndex: number, field: keyof PromptItem, value: string) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        const updated = [...s.prompts];
+        updated[promptIndex] = { ...updated[promptIndex], [field]: value };
+        return { ...s, prompts: updated };
+      })
+    );
+  }
+
+  function removePrompt(sectionIndex: number, promptIndex: number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        return { ...s, prompts: s.prompts.filter((_, j) => j !== promptIndex) };
+      })
+    );
+  }
+
+  // Workflow steps operations inside a section
+  function addStep(sectionIndex: number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        return {
+          ...s,
+          steps: [...s.steps, { order: s.steps.length + 1, title: "", description: "" }],
+        };
+      })
+    );
+  }
+
+  function updateStep(sectionIndex: number, stepIndex: number, field: keyof WorkflowStep, value: string | number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        const updated = [...s.steps];
+        updated[stepIndex] = { ...updated[stepIndex], [field]: value as never };
+        return { ...s, steps: updated };
+      })
+    );
+  }
+
+  function removeStep(sectionIndex: number, stepIndex: number) {
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        const filtered = s.steps.filter((_, j) => j !== stepIndex);
+        return {
+          ...s,
+          steps: filtered.map((st, k) => ({ ...st, order: k + 1 })),
+        };
+      })
+    );
+  }
+
+  function moveStep(sectionIndex: number, stepIndex: number, direction: "up" | "down") {
+    const newIndex = direction === "up" ? stepIndex - 1 : stepIndex + 1;
+    setSections((prev) =>
+      prev.map((s, i) => {
+        if (i !== sectionIndex) return s;
+        if (newIndex < 0 || newIndex >= s.steps.length) return s;
+        const updated = [...s.steps];
+        [updated[stepIndex], updated[newIndex]] = [updated[newIndex], updated[stepIndex]];
+        return {
+          ...s,
+          steps: updated.map((st, k) => ({ ...st, order: k + 1 })),
+        };
+      })
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -155,12 +268,13 @@ export function WorkForm({ work }: WorkFormProps) {
           .filter(Boolean),
         coverImage: form.coverImage,
         description: form.description,
-        content: form.content,
-        images: form.images,
+        content: "",
+        images: [],
         videoUrl: form.videoUrl || null,
-        prompts,
-        workflow,
-        summary: form.summary,
+        prompts: [],
+        workflow: [],
+        summary: "",
+        sections,
         featured: form.featured,
         published: form.published,
       };
@@ -330,161 +444,263 @@ export function WorkForm({ work }: WorkFormProps) {
 
       <Separator />
 
-      {/* Content */}
-      <section className="space-y-4">
-        <h3 className="font-semibold">详细内容（Markdown）</h3>
-        <Textarea
-          value={form.content}
-          onChange={(e) => updateField("content", e.target.value)}
-          placeholder="## 项目概述&#10;&#10;项目详细介绍...&#10;&#10;## 创作亮点&#10;&#10;- 亮点1&#10;- 亮点2"
-          rows={10}
-          className="font-mono text-sm"
-        />
-      </section>
-
-      <Separator />
-
-      {/* Images */}
-      <section className="space-y-4">
-        <h3 className="font-semibold">图片列表（每行一个URL）</h3>
-        <Textarea
-          value={form.images.join("\n")}
-          onChange={(e) =>
-            updateField("images", e.target.value.split("\n").filter(Boolean))
-          }
-          placeholder="/uploads/images/img1.jpg&#10;/uploads/images/img2.jpg"
-          rows={4}
-        />
-      </section>
-
-      <Separator />
-
-      {/* Prompts */}
+      {/* Dynamic Sections */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold">Prompt 列表</h3>
-          <Button type="button" variant="outline" size="sm" onClick={addPrompt}>
-            <Plus className="h-4 w-4 mr-1" /> 添加 Prompt
-          </Button>
+          <h3 className="font-semibold">内容区块</h3>
+          <DropdownAddSection onAdd={addSection} />
         </div>
-        {prompts.map((prompt, i) => (
-          <div key={i} className="border border-border/60 rounded-xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                Prompt #{i + 1}
+
+        {sections.length === 0 && (
+          <div className="text-center py-8 border border-dashed border-border/60 rounded-xl">
+            <p className="text-muted-foreground text-sm mb-3">
+              尚未添加内容区块
+            </p>
+            <DropdownAddSection onAdd={addSection} />
+          </div>
+        )}
+
+        {sections.map((section, i) => (
+          <div
+            key={section.id}
+            className={`border border-border/60 rounded-xl p-4 space-y-4 ${
+              section.hidden ? "opacity-60 border-dashed bg-muted/30" : ""
+            }`}
+          >
+            {/* Section header */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-0.5 text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => moveSection(i, "up")}
+                  disabled={i === 0}
+                  className="p-0.5 hover:text-foreground disabled:opacity-30"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveSection(i, "down")}
+                  disabled={i === sections.length - 1}
+                  className="p-0.5 hover:text-foreground disabled:opacity-30"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <GripVertical className="h-4 w-4 text-muted-foreground/50" />
+              <span className="text-xs font-mono text-muted-foreground">
+                #{i + 1}
               </span>
+              <Input
+                placeholder="区块标题"
+                value={section.title}
+                onChange={(e) => updateSection(i, "title", e.target.value)}
+                className="flex-1 h-8 text-sm font-medium"
+              />
+              <Select
+                value={section.type}
+                onValueChange={(v) => updateSection(i, "type", v)}
+              >
+                <SelectTrigger className="w-[110px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SECTION_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                onClick={() => removePrompt(i)}
+                className="h-7 w-7 text-muted-foreground hover:text-foreground shrink-0"
+                onClick={() => toggleSectionHidden(i)}
+                title={section.hidden ? "已隐藏，点击显示" : "可见，点击隐藏"}
+              >
+                {section.hidden ? (
+                  <EyeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <Eye className="h-3.5 w-3.5" />
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+                onClick={() => removeSection(i)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
-            <Input
-              placeholder="Prompt 标题"
-              value={prompt.title}
-              onChange={(e) => updatePrompt(i, "title", e.target.value)}
-            />
-            <Textarea
-              placeholder="Prompt 内容"
-              value={prompt.content}
-              onChange={(e) => updatePrompt(i, "content", e.target.value)}
-              rows={3}
-              className="font-mono text-sm"
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                placeholder="使用的模型"
-                value={prompt.model}
-                onChange={(e) => updatePrompt(i, "model", e.target.value)}
-              />
-              <Input
-                placeholder="备注/技巧"
-                value={prompt.notes}
-                onChange={(e) => updatePrompt(i, "notes", e.target.value)}
-              />
-            </div>
-          </div>
-        ))}
-      </section>
 
-      <Separator />
+            {/* Section content based on type */}
+            {section.type === "markdown" && (
+              <Textarea
+                value={section.content}
+                onChange={(e) => updateSection(i, "content", e.target.value)}
+                placeholder="Markdown 内容..."
+                rows={6}
+                className="font-mono text-sm"
+              />
+            )}
 
-      {/* Workflow */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold">创作流程</h3>
-          <Button type="button" variant="outline" size="sm" onClick={addStep}>
-            <Plus className="h-4 w-4 mr-1" /> 添加步骤
-          </Button>
-        </div>
-        {workflow.map((step, i) => (
-          <div key={i} className="border border-border/60 rounded-xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">
-                步骤 {step.order}
-              </span>
-              <div className="flex items-center gap-1">
+            {section.type === "images" && (
+              <Textarea
+                value={section.images.join("\n")}
+                onChange={(e) =>
+                  updateSection(i, "images", e.target.value.split("\n").filter(Boolean))
+                }
+                placeholder="每行一个图片URL..."
+                rows={4}
+              />
+            )}
+
+            {section.type === "prompts" && (
+              <div className="space-y-3">
+                {section.prompts.map((prompt, pi) => (
+                  <div
+                    key={pi}
+                    className="border border-border/40 rounded-lg p-3 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        Prompt #{pi + 1}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                        onClick={() => removePrompt(i, pi)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <Input
+                      placeholder="Prompt 标题"
+                      value={prompt.title}
+                      onChange={(e) =>
+                        updatePrompt(i, pi, "title", e.target.value)
+                      }
+                      className="h-8 text-sm"
+                    />
+                    <Textarea
+                      placeholder="Prompt 内容"
+                      value={prompt.content}
+                      onChange={(e) =>
+                        updatePrompt(i, pi, "content", e.target.value)
+                      }
+                      rows={3}
+                      className="font-mono text-sm"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder="使用的模型"
+                        value={prompt.model}
+                        onChange={(e) =>
+                          updatePrompt(i, pi, "model", e.target.value)
+                        }
+                        className="h-8 text-sm"
+                      />
+                      <Input
+                        placeholder="备注/技巧"
+                        value={prompt.notes}
+                        onChange={(e) =>
+                          updatePrompt(i, pi, "notes", e.target.value)
+                        }
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                ))}
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => moveStep(i, "up")}
-                  disabled={i === 0}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addPrompt(i)}
                 >
-                  <ArrowUp className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => moveStep(i, "down")}
-                  disabled={i === workflow.length - 1}
-                >
-                  <ArrowDown className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                  onClick={() => removeStep(i)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Plus className="h-3.5 w-3.5 mr-1" /> 添加 Prompt
                 </Button>
               </div>
-            </div>
-            <Input
-              placeholder="步骤标题"
-              value={step.title}
-              onChange={(e) => updateStep(i, "title", e.target.value)}
-            />
-            <Textarea
-              placeholder="步骤描述"
-              value={step.description}
-              onChange={(e) => updateStep(i, "description", e.target.value)}
-              rows={2}
-            />
+            )}
+
+            {section.type === "steps" && (
+              <div className="space-y-3">
+                {section.steps.map((step, si) => (
+                  <div
+                    key={si}
+                    className="border border-border/40 rounded-lg p-3 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        步骤 {step.order}
+                      </span>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => moveStep(i, si, "up")}
+                          disabled={si === 0}
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => moveStep(i, si, "down")}
+                          disabled={si === section.steps.length - 1}
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          onClick={() => removeStep(i, si)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <Input
+                      placeholder="步骤标题"
+                      value={step.title}
+                      onChange={(e) =>
+                        updateStep(i, si, "title", e.target.value)
+                      }
+                      className="h-8 text-sm"
+                    />
+                    <Textarea
+                      placeholder="步骤描述"
+                      value={step.description}
+                      onChange={(e) =>
+                        updateStep(i, si, "description", e.target.value)
+                      }
+                      rows={2}
+                    />
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addStep(i)}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" /> 添加步骤
+                </Button>
+              </div>
+            )}
           </div>
         ))}
-      </section>
-
-      <Separator />
-
-      {/* Summary */}
-      <section className="space-y-4">
-        <h3 className="font-semibold">项目总结</h3>
-        <Textarea
-          value={form.summary}
-          onChange={(e) => updateField("summary", e.target.value)}
-          placeholder="项目总结..."
-          rows={4}
-        />
       </section>
 
       <Separator />
@@ -533,4 +749,101 @@ export function WorkForm({ work }: WorkFormProps) {
       </div>
     </form>
   );
+}
+
+// Dropdown button for adding a section
+function DropdownAddSection({ onAdd }: { onAdd: (type: WorkSection["type"]) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      {SECTION_TYPES.map((t) => (
+        <Button
+          key={t.value}
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onAdd(t.value as WorkSection["type"])}
+        >
+          <Plus className="h-3.5 w-3.5 mr-1" /> {t.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+// Convert legacy work data to sections format for editing
+function legacyToSections(work: Work): WorkSection[] {
+  const sections: WorkSection[] = [];
+  let order = 0;
+
+  if (work.content) {
+    sections.push({
+      id: makeSectionId(),
+      title: "项目详情",
+      type: "markdown",
+      content: work.content,
+      images: [],
+      prompts: [],
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.images.length > 0) {
+    sections.push({
+      id: makeSectionId(),
+      title: "作品展示",
+      type: "images",
+      content: "",
+      images: work.images,
+      prompts: [],
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.prompts.length > 0) {
+    sections.push({
+      id: makeSectionId(),
+      title: "Prompt 展示",
+      type: "prompts",
+      content: "",
+      images: [],
+      prompts: work.prompts,
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.workflow.length > 0) {
+    sections.push({
+      id: makeSectionId(),
+      title: "创作流程",
+      type: "steps",
+      content: "",
+      images: [],
+      prompts: [],
+      steps: work.workflow,
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.summary) {
+    sections.push({
+      id: makeSectionId(),
+      title: "项目总结",
+      type: "markdown",
+      content: work.summary,
+      images: [],
+      prompts: [],
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  return sections;
 }

@@ -109,6 +109,7 @@ export async function createWork(data: Omit<Work, "id" | "createdAt" | "updatedA
       prompts: JSON.stringify(data.prompts),
       workflow: JSON.stringify(data.workflow),
       summary: data.summary,
+      sections: JSON.stringify(data.sections ?? []),
       featured: data.featured,
       published: data.published,
     },
@@ -134,6 +135,7 @@ export async function updateWork(
   if (data.prompts !== undefined) updateData.prompts = JSON.stringify(data.prompts);
   if (data.workflow !== undefined) updateData.workflow = JSON.stringify(data.workflow);
   if (data.summary !== undefined) updateData.summary = data.summary;
+  if (data.sections !== undefined) updateData.sections = JSON.stringify(data.sections);
   if (data.featured !== undefined) updateData.featured = data.featured;
   if (data.published !== undefined) updateData.published = data.published;
 

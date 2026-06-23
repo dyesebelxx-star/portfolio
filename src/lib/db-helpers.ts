@@ -13,6 +13,7 @@ export function dbWorkToWork(db: PrismaWork): Work {
     images: parseJsonArray(db.images),
     prompts: parseJsonArray(db.prompts),
     workflow: parseJsonArray(db.workflow),
+    sections: parseJsonArray(db.sections),
     videoUrl: db.videoUrl || null,
   };
 }
@@ -28,6 +29,7 @@ export function workToDb(data: WorkFormData) {
     images: JSON.stringify(data.images),
     prompts: JSON.stringify(data.prompts),
     workflow: JSON.stringify(data.workflow),
+    sections: JSON.stringify(data.sections ?? []),
     videoUrl: data.videoUrl || "",
   };
 }

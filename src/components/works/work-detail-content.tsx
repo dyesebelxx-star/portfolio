@@ -7,10 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Work } from "@/types";
+import type { Work, WorkSection, PromptItem, WorkflowStep } from "@/types";
 import { cn } from "@/lib/utils";
 
 export function WorkDetailContent({ work }: { work: Work }) {
+  const allSections = work.sections && work.sections.length > 0
+    ? work.sections
+    : legacySections(work);
+  // Filter out hidden sections for public display
+  const sections = allSections.filter((s) => !s.hidden);
+  const defaultTab = sections.length > 0 ? sections[0].id : "";
+
   return (
     <article className="container-page py-16 sm:py-20">
       {/* Cover Image */}
@@ -64,94 +71,97 @@ export function WorkDetailContent({ work }: { work: Work }) {
         )}
       </div>
 
-      {/* Tabs: Content / Prompts / Workflow */}
-      <Tabs defaultValue="content" className="mb-12">
-        <TabsList className="mb-6">
-          <TabsTrigger value="content">项目详情</TabsTrigger>
-          <TabsTrigger value="prompts">
-            Prompt 展示 ({work.prompts.length})
-          </TabsTrigger>
-          <TabsTrigger value="workflow">创作流程</TabsTrigger>
-        </TabsList>
+      {/* Video Embed (global, outside sections) */}
+      {work.videoUrl && (
+        <div className="mb-10">
+          <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
+            <video
+              src={work.videoUrl}
+              controls
+              className="absolute inset-0 w-full h-full"
+              poster={work.coverImage}
+            />
+          </div>
+        </div>
+      )}
 
-        <TabsContent value="content" className="space-y-8">
-          {/* Text content (Markdown rendered) */}
-          {work.content && (
-            <div className="prose-content max-w-none bg-card border border-border/40 rounded-xl p-6 sm:p-8">
-              <ContentMarkdown content={work.content} />
+      {/* Dynamic Sections Tabs */}
+      {sections.length > 0 && (
+        <Tabs defaultValue={defaultTab} className="mb-12">
+          <TabsList className="mb-6 flex-wrap h-auto gap-1">
+            {sections.map((section) => (
+              <TabsTrigger key={section.id} value={section.id}>
+                {section.title || `区块 ${section.order + 1}`}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {sections.map((section) => (
+            <TabsContent key={section.id} value={section.id} className="space-y-8">
+              <SectionRenderer section={section} />
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
+    </article>
+  );
+}
+
+function SectionRenderer({ section }: { section: WorkSection }) {
+  return (
+    <>
+      {/* Markdown */}
+      {section.type === "markdown" && section.content && (
+        <div className="prose-content max-w-none bg-card border border-border/40 rounded-xl p-6 sm:p-8">
+          <ContentMarkdown content={section.content} />
+        </div>
+      )}
+
+      {/* Images */}
+      {section.type === "images" && section.images.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {section.images.map((img, i) => (
+            <div
+              key={i}
+              className="relative aspect-video bg-muted rounded-xl overflow-hidden"
+            >
+              <Image
+                src={img}
+                alt={`${section.title} - 图片 ${i + 1}`}
+                fill
+                className="object-cover hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 640px) 100vw, 50vw"
+              />
             </div>
-          )}
+          ))}
+        </div>
+      )}
 
-          {/* Image Gallery */}
-          {work.images.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">作品展示</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {work.images.map((img, i) => (
-                  <div
-                    key={i}
-                    className="relative aspect-video bg-muted rounded-xl overflow-hidden"
-                  >
-                    <Image
-                      src={img}
-                      alt={`${work.title} - 图片 ${i + 1}`}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform duration-500"
-                      sizes="(max-width: 640px) 100vw, 50vw"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Video Embed */}
-          {work.videoUrl && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4">视频展示</h3>
-              <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-                <video
-                  src={work.videoUrl}
-                  controls
-                  className="absolute inset-0 w-full h-full"
-                  poster={work.coverImage}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Summary */}
-          {work.summary && (
-            <div>
-              <Separator className="mb-6" />
-              <h3 className="text-lg font-semibold mb-3">项目总结</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {work.summary}
-              </p>
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="prompts" className="space-y-6">
-          {work.prompts.length === 0 ? (
+      {/* Prompts */}
+      {section.type === "prompts" && (
+        <div className="space-y-4">
+          {section.prompts.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
               暂无 Prompt 信息
             </p>
           ) : (
-            work.prompts.map((prompt, i) => (
+            section.prompts.map((prompt, i) => (
               <PromptBlock key={i} prompt={prompt} index={i} />
             ))
           )}
-        </TabsContent>
+        </div>
+      )}
 
-        <TabsContent value="workflow" className="space-y-0">
-          {work.workflow.length === 0 ? (
+      {/* Steps */}
+      {section.type === "steps" && (
+        <div className="space-y-0">
+          {section.steps.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              暂无创作流程信息
+              暂无流程信息
             </p>
           ) : (
             <div className="relative pl-8 border-l-2 border-border/60 space-y-8">
-              {work.workflow
+              {section.steps
                 .sort((a, b) => a.order - b.order)
                 .map((step) => (
                   <div key={step.order} className="relative">
@@ -177,15 +187,92 @@ export function WorkDetailContent({ work }: { work: Work }) {
                 ))}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
-    </article>
+        </div>
+      )}
+    </>
   );
 }
 
-// Simple markdown renderer (no external dependency needed for basic markdown)
+// Build legacy sections from old fields for backward compatibility
+function legacySections(work: Work): WorkSection[] {
+  const sections: WorkSection[] = [];
+  let order = 0;
+
+  if (work.content) {
+    sections.push({
+      id: "legacy-content",
+      title: "项目详情",
+      type: "markdown" as const,
+      content: work.content,
+      images: [],
+      prompts: [],
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.images.length > 0) {
+    sections.push({
+      id: "legacy-images",
+      title: "作品展示",
+      type: "images" as const,
+      content: "",
+      images: work.images,
+      prompts: [],
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.summary) {
+    sections.push({
+      id: "legacy-summary",
+      title: "项目总结",
+      type: "markdown" as const,
+      content: work.summary,
+      images: [],
+      prompts: [],
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.prompts.length > 0) {
+    sections.push({
+      id: "legacy-prompts",
+      title: "Prompt 展示",
+      type: "prompts" as const,
+      content: "",
+      images: [],
+      prompts: work.prompts,
+      steps: [],
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  if (work.workflow.length > 0) {
+    sections.push({
+      id: "legacy-workflow",
+      title: "创作流程",
+      type: "steps" as const,
+      content: "",
+      images: [],
+      prompts: [],
+      steps: work.workflow,
+      order: order++,
+      hidden: false,
+    });
+  }
+
+  return sections;
+}
+
+// Simple markdown renderer
 function ContentMarkdown({ content }: { content: string }) {
-  // Split by headings and paragraphs
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
 
@@ -198,7 +285,6 @@ function ContentMarkdown({ content }: { content: string }) {
       continue;
     }
 
-    // Heading 2
     if (line.startsWith("## ")) {
       elements.push(
         <h2 key={i} className="text-xl font-semibold mt-8 mb-3">
@@ -209,7 +295,6 @@ function ContentMarkdown({ content }: { content: string }) {
       continue;
     }
 
-    // Heading 3
     if (line.startsWith("### ")) {
       elements.push(
         <h3 key={i} className="text-lg font-medium mt-6 mb-2">
@@ -220,7 +305,6 @@ function ContentMarkdown({ content }: { content: string }) {
       continue;
     }
 
-    // List items
     if (line.startsWith("- ") || line.startsWith("* ")) {
       const items: string[] = [];
       while (i < lines.length && (lines[i].startsWith("- ") || lines[i].startsWith("* "))) {
@@ -230,7 +314,6 @@ function ContentMarkdown({ content }: { content: string }) {
       elements.push(
         <ul key={i} className="list-disc pl-6 mb-4 space-y-1">
           {items.map((item, j) => {
-            // Handle bold text
             const formatted = item.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
             return (
               <li
@@ -245,7 +328,6 @@ function ContentMarkdown({ content }: { content: string }) {
       continue;
     }
 
-    // Paragraph (collect consecutive non-empty lines)
     const paragraphLines: string[] = [];
     while (i < lines.length && lines[i].trim() && !lines[i].startsWith("#") && !lines[i].startsWith("- ") && !lines[i].startsWith("* ")) {
       paragraphLines.push(lines[i]);
@@ -272,7 +354,7 @@ function PromptBlock({
   prompt,
   index,
 }: {
-  prompt: { title: string; content: string; model: string; notes: string };
+  prompt: PromptItem;
   index: number;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -295,9 +377,11 @@ function PromptBlock({
             <span className="text-xs font-mono text-muted-foreground">
               #{index + 1}
             </span>
-            <h4 className="font-medium">{prompt.title}</h4>
+            <h4 className="font-medium">{prompt.title || "Untitled Prompt"}</h4>
           </div>
-          <p className="text-xs text-muted-foreground">模型: {prompt.model}</p>
+          {prompt.model && (
+            <p className="text-xs text-muted-foreground">模型: {prompt.model}</p>
+          )}
         </div>
         {expanded ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" />
