@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, ArrowUp, ArrowDown, Loader2, Upload, GripVertical, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -449,20 +450,14 @@ export function WorkForm({ work }: WorkFormProps) {
         <h3 className="font-semibold">封面与媒体</h3>
         <div className="space-y-2">
           <Label>封面图</Label>
-          <div className="flex gap-3">
-            <Input
-              value={form.coverImage}
-              onChange={(e) => updateField("coverImage", e.target.value)}
-              placeholder="/uploads/covers/xxx.jpg 或 URL"
-              className="flex-1"
-            />
+          <div className="flex items-center gap-3">
             <label className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border text-sm hover:bg-muted cursor-pointer">
               {uploading === "cover" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 <Upload className="h-4 w-4" />
               )}
-              上传
+              {form.coverImage ? "重新上传封面" : "上传封面"}
               <input
                 type="file"
                 accept="image/*"
@@ -473,25 +468,35 @@ export function WorkForm({ work }: WorkFormProps) {
                 }}
               />
             </label>
+            {form.coverImage && (
+              <span className="text-xs text-muted-foreground truncate max-w-[300px]">
+                ✓ 已上传
+              </span>
+            )}
           </div>
+          {form.coverImage && (
+            <div className="relative w-40 aspect-video rounded-lg overflow-hidden bg-muted border border-border/40">
+              <Image
+                src={form.coverImage}
+                alt="封面预览"
+                fill
+                className="object-cover"
+                sizes="160px"
+              />
+            </div>
+          )}
         </div>
         {form.type === "video" && (
           <div className="space-y-2">
-            <Label>视频 URL</Label>
-            <div className="flex gap-3">
-              <Input
-                value={form.videoUrl}
-                onChange={(e) => updateField("videoUrl", e.target.value)}
-                placeholder="视频链接或上传"
-                className="flex-1"
-              />
+            <Label>视频文件</Label>
+            <div className="flex items-center gap-3">
               <label className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border text-sm hover:bg-muted cursor-pointer">
                 {uploading === "video" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Upload className="h-4 w-4" />
                 )}
-                上传
+                {form.videoUrl ? "重新上传视频" : "上传视频"}
                 <input
                   type="file"
                   accept="video/*"
@@ -502,6 +507,11 @@ export function WorkForm({ work }: WorkFormProps) {
                   }}
                 />
               </label>
+              {form.videoUrl && (
+                <span className="text-xs text-muted-foreground">
+                  ✓ 已上传
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -656,22 +666,14 @@ export function WorkForm({ work }: WorkFormProps) {
                         </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="图片 URL 或上传"
-                        value={img.url}
-                        onChange={(e) =>
-                          updateImage(i, ii, "url", e.target.value)
-                        }
-                        className="h-8 text-sm flex-1"
-                      />
-                      <label className="inline-flex items-center gap-1 px-3 py-0 rounded-md border border-border text-xs hover:bg-muted cursor-pointer shrink-0">
+                    <div className="flex items-center gap-3">
+                      <label className="inline-flex items-center gap-1 px-3 py-2 rounded-md border border-border text-xs hover:bg-muted cursor-pointer">
                         {uploading === `img_${i}_${ii}` ? (
                           <Loader2 className="h-3 w-3 animate-spin" />
                         ) : (
                           <Upload className="h-3 w-3" />
                         )}
-                        上传
+                        {img.url ? "重新上传" : "上传图片"}
                         <input
                           type="file"
                           accept="image/*"
@@ -682,6 +684,15 @@ export function WorkForm({ work }: WorkFormProps) {
                           }}
                         />
                       </label>
+                      {img.url ? (
+                        <span className="text-xs text-green-600 dark:text-green-400">
+                          ✓ 已上传
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          请上传图片
+                        </span>
+                      )}
                     </div>
                     <Textarea
                       placeholder="图片对应的 Prompt（可选）"
