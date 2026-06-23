@@ -232,22 +232,13 @@ export function WorkForm({ work }: WorkFormProps) {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="category">分类</Label>
-            <Select
+            <Label htmlFor="category">分类（自由输入）</Label>
+            <Input
+              id="category"
               value={form.category}
-              onValueChange={(v) => updateField("category", v)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="AI短剧">AI短剧</SelectItem>
-                <SelectItem value="恋综">恋综</SelectItem>
-                <SelectItem value="人物设计">人物设计</SelectItem>
-                <SelectItem value="场景设计">场景设计</SelectItem>
-                <SelectItem value="其他">其他</SelectItem>
-              </SelectContent>
-            </Select>
+              onChange={(e) => updateField("category", e.target.value)}
+              placeholder="例如：AI短剧、人物设计、或自定义分类"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="tags">标签（逗号分隔）</Label>

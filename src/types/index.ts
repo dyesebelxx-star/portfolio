@@ -1,11 +1,6 @@
 export type WorkType = "video" | "image";
 
-export type WorkCategory =
-  | "AI短剧"
-  | "恋综"
-  | "人物设计"
-  | "场景设计"
-  | "其他";
+export type WorkCategory = string;
 
 export interface PromptItem {
   title: string;

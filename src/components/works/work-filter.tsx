@@ -54,22 +54,13 @@ export function WorkFilter() {
           <SelectItem value="image">图片</SelectItem>
         </SelectContent>
       </Select>
-      <Select
-        value={currentCategory}
-        onValueChange={(v) => updateFilters("category", v === "all" ? "" : (v ?? ""))}
-      >
-        <SelectTrigger className="w-full sm:w-[150px]">
-          <SelectValue placeholder="分类" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">全部分类</SelectItem>
-          <SelectItem value="AI短剧">AI短剧</SelectItem>
-          <SelectItem value="恋综">恋综</SelectItem>
-          <SelectItem value="人物设计">人物设计</SelectItem>
-          <SelectItem value="场景设计">场景设计</SelectItem>
-          <SelectItem value="其他">其他</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="relative flex-1 sm:flex-none sm:w-[150px]">
+        <Input
+          placeholder="搜索分类..."
+          value={currentCategory}
+          onChange={(e) => updateFilters("category", e.target.value)}
+        />
+      </div>
     </div>
   );
 }

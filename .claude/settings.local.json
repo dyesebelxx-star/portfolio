@@ -22,7 +22,20 @@
       "Bash(curl -s -w \"\\\\nHTTP: %{http_code}\" https://cooperative-vitality-production-83d0.up.railway.app)",
       "Bash(railway status *)",
       "Bash(npx tsc *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Skill(run)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(grep -oP '[^<>\\\\\"]{0,30}\\(图片作品|视频作品|精选作品|探索我的作品\\)[^<>\\\\\"]{0,30}')",
+      "Bash(curl -s http://localhost:3000/admin/login)",
+      "Bash(grep -oP '[^<>\\\\\"]{0,20}\\(登录|仪表盘|admin\\)[^<>\\\\\"]{0,20}')",
+      "Bash(railway --version)",
+      "Bash(railway project *)",
+      "Bash(railway link *)",
+      "Bash(git push *)",
+      "Bash(curl -s https://cooperative-vitality-production-83d0.up.railway.app)",
+      "Bash(grep -oP '[^<>\\\\\"]{0,25}\\(图片作品|视频作品|精选作品|探索我的作品\\)[^<>\\\\\"]{0,25}')"
     ]
   }
 }
