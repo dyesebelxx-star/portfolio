@@ -131,7 +131,7 @@ export async function updateWork(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.content !== undefined) updateData.content = data.content;
   if (data.images !== undefined) updateData.images = JSON.stringify(data.images);
-  if (data.videoUrl !== undefined) updateData.videoUrl = data.videoUrl;
+  if (data.videoUrl !== undefined) updateData.videoUrl = data.videoUrl ?? "";
   if (data.prompts !== undefined) updateData.prompts = JSON.stringify(data.prompts);
   if (data.workflow !== undefined) updateData.workflow = JSON.stringify(data.workflow);
   if (data.summary !== undefined) updateData.summary = data.summary;
