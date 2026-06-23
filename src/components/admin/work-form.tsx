@@ -503,8 +503,8 @@ export function WorkForm({ work }: WorkFormProps) {
         <h3 className="font-semibold">发布设置</h3>
         <div className="flex items-center justify-between py-2">
           <div>
-            <Label htmlFor="featured">精选作品</Label>
-            <p className="text-xs text-muted-foreground">在首页精选区域展示</p>
+            <Label htmlFor="featured">亮点标记</Label>
+            <p className="text-xs text-muted-foreground">标记为亮点作品（可用于特定展示场景）</p>
           </div>
           <Switch
             id="featured"

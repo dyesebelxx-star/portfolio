@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { HeroSection } from "@/components/home/hero-section";
-import { FeaturedWorks } from "@/components/home/featured-works";
-import { CategoryNav } from "@/components/home/category-nav";
+import { ImageWorks } from "@/components/home/image-works";
+import { VideoWorks } from "@/components/home/video-works";
 import { Capabilities } from "@/components/home/capabilities";
 
 export const dynamic = "force-dynamic";
@@ -12,10 +12,12 @@ export default function HomePage() {
       <Suspense fallback={<div className="py-24" />}>
         <HeroSection />
       </Suspense>
-      <Suspense fallback={<FeaturedWorksFallback />}>
-        <FeaturedWorks />
+      <Suspense fallback={<WorksFallback />}>
+        <ImageWorks />
       </Suspense>
-      <CategoryNav />
+      <Suspense fallback={<WorksFallback />}>
+        <VideoWorks />
+      </Suspense>
       <Suspense fallback={<div className="py-20" />}>
         <Capabilities />
       </Suspense>
@@ -23,7 +25,7 @@ export default function HomePage() {
   );
 }
 
-function FeaturedWorksFallback() {
+function WorksFallback() {
   return (
     <section className="py-20 sm:py-28">
       <div className="container-page">

@@ -33,7 +33,6 @@ export default async function AdminWorksPage() {
               <th className="text-left p-3 font-medium text-muted-foreground hidden md:table-cell">Slug</th>
               <th className="text-left p-3 font-medium text-muted-foreground hidden sm:table-cell">类型</th>
               <th className="text-left p-3 font-medium text-muted-foreground hidden sm:table-cell">分类</th>
-              <th className="text-left p-3 font-medium text-muted-foreground hidden lg:table-cell">精选</th>
               <th className="text-left p-3 font-medium text-muted-foreground hidden lg:table-cell">状态</th>
               <th className="text-right p-3 font-medium text-muted-foreground">操作</th>
             </tr>
@@ -55,9 +54,6 @@ export default async function AdminWorksPage() {
                 </td>
                 <td className="p-3 text-muted-foreground hidden sm:table-cell">
                   {work.category}
-                </td>
-                <td className="p-3 hidden lg:table-cell">
-                  {work.featured ? "⭐" : "-"}
                 </td>
                 <td className="p-3 hidden lg:table-cell">
                   <span

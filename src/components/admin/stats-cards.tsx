@@ -1,4 +1,4 @@
-import { FileVideo, Image, Globe, Star } from "lucide-react";
+import { FileVideo, Image, Globe } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface StatsCardsProps {
@@ -17,11 +17,10 @@ export function StatsCards({ stats }: StatsCardsProps) {
     { label: "已发布", value: stats.published, icon: Globe, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
     { label: "视频作品", value: stats.videos, icon: FileVideo, color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/30" },
     { label: "图片作品", value: stats.images, icon: Image, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-950/30" },
-    { label: "精选作品", value: stats.featured, icon: Star, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/30" },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {items.map((item) => (
         <Card key={item.label} className="border-border/60">
           <CardContent className="p-4">
