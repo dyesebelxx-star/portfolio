@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Cursor/portfolio/**)",
+      "Bash(npx next *)",
+      "Bash(npx prisma *)"
+    ]
+  }
+}
