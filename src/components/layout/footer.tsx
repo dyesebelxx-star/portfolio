@@ -32,9 +32,6 @@ export function Footer() {
               <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 关于我
               </Link>
-              <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                联系方式
-              </Link>
             </nav>
           </div>
 
