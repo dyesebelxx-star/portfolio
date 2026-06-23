@@ -3,7 +3,12 @@
     "allow": [
       "Read(//c/Cursor/portfolio/**)",
       "Bash(npx next *)",
-      "Bash(npx prisma *)"
+      "Bash(npx prisma *)",
+      "Bash(gh auth *)",
+      "Bash(where gh *)",
+      "Bash(where gh.exe)",
+      "Bash(winget list *)",
+      "Bash(winget install *)"
     ]
   }
 }
