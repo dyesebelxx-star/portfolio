@@ -4,6 +4,8 @@ import { WorkFilter } from "@/components/works/work-filter";
 import { WorkCard } from "@/components/works/work-card";
 import { getAllWorks } from "@/actions/work";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "作品展示",
   description: "浏览AI内容创作作品：AI视频、AI图片、Prompt工程等精选作品合集。",

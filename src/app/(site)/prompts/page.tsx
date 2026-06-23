@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getPromptWorks } from "@/actions/work";
 import { PromptGrid } from "@/components/prompts/prompt-grid";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Prompt Library",
   description: "AI Prompt精选库 — 收录Midjourney、Stable Diffusion等平台的优质Prompt模板和工程实践。",

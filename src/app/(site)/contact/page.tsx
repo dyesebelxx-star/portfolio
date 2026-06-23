@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { getManySiteConfigs } from "@/actions/site-config";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "联系方式",
   description: "联系AI内容创作者，探讨合作机会或交流AI创作经验。",

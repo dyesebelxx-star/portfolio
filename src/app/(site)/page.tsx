@@ -5,6 +5,8 @@ import { CategoryNav } from "@/components/home/category-nav";
 import { Capabilities } from "@/components/home/capabilities";
 import { ContactCTA } from "@/components/home/contact-cta";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <>

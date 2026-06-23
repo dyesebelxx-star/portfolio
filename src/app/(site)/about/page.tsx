@@ -3,6 +3,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { getManySiteConfigs } from "@/actions/site-config";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "关于我",
   description: "了解AI内容创作者的背景、技能和创作理念。",

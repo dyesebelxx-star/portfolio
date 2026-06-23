@@ -1,15 +1,12 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getWorkBySlug, getAllWorks } from "@/actions/work";
+import { getWorkBySlug } from "@/actions/work";
 import { WorkDetailContent } from "@/components/works/work-detail-content";
+
+export const dynamic = "force-dynamic";
 
 interface WorkDetailPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const works = await getAllWorks();
-  return works.map((work) => ({ slug: work.slug }));
 }
 
 export async function generateMetadata({

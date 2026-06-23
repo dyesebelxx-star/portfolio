@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getWorksByType } from "@/actions/work";
 import { WorkCard } from "@/components/works/work-card";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "AI短视频作品",
   description: "AI生成的短视频作品集，包括AI短剧、恋综等创意视频项目。",

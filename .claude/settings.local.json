@@ -8,7 +8,19 @@
       "Bash(where gh *)",
       "Bash(where gh.exe)",
       "Bash(winget list *)",
-      "Bash(winget install *)"
+      "Bash(winget install *)",
+      "Bash(npm install *)",
+      "Bash(railway login *)",
+      "Bash(cmd.exe *)",
+      "Bash(railway init *)",
+      "Bash(railway up *)",
+      "Bash(railway domain *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://cooperative-vitality-production-83d0.up.railway.app)",
+      "Bash(railway logs *)",
+      "Bash(railway variables *)",
+      "Bash(railway service *)",
+      "Bash(curl -s -w \"\\\\nHTTP: %{http_code}\" https://cooperative-vitality-production-83d0.up.railway.app)",
+      "Bash(railway status *)"
     ]
   }
 }

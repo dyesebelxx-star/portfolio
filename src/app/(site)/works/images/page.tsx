@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getWorksByType } from "@/actions/work";
 import { WorkCard } from "@/components/works/work-card";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "AI图片作品",
   description: "AI生成的图片作品集，包括人物设计、场景设计、时装系列等创意图片项目。",
