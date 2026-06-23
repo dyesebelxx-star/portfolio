@@ -10,8 +10,8 @@ async function main() {
   // Create admin user
   await prisma.admin.create({
     data: {
-      username: "admin",
-      passwordHash: "admin123", // For env-based auth, this is a placeholder
+      username: "dyesebel",
+      passwordHash: "dyesebel726224", // For env-based auth, this is a placeholder
     },
   });
 
@@ -240,7 +240,7 @@ async function main() {
 
   console.log("✅ Seed data created successfully");
   console.log(`   - ${works.length} sample works`);
-  console.log("   - 1 admin user (admin / admin123)");
+  console.log("   - 1 admin user (dyesebel / dyesebel726224)");
   console.log(`   - ${Object.keys(siteConfigs).length} site config entries`);
 }
 
