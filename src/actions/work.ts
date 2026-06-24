@@ -94,27 +94,32 @@ export async function getWorkById(id: string): Promise<Work | null> {
 }
 
 export async function createWork(data: Omit<Work, "id" | "createdAt" | "updatedAt">) {
-  const work = await prisma.work.create({
-    data: {
-      slug: data.slug,
-      title: data.title,
-      type: data.type,
-      category: data.category,
-      tags: JSON.stringify(data.tags),
-      coverImage: data.coverImage,
-      description: data.description,
-      content: data.content,
-      images: JSON.stringify(data.images),
-      videoUrl: data.videoUrl || "",
-      prompts: JSON.stringify(data.prompts),
-      workflow: JSON.stringify(data.workflow),
-      summary: data.summary,
-      sections: JSON.stringify(data.sections ?? []),
-      featured: data.featured,
-      published: data.published,
-    },
-  });
-  return dbWorkToWork(work);
+  try {
+    const work = await prisma.work.create({
+      data: {
+        slug: data.slug,
+        title: data.title,
+        type: data.type,
+        category: data.category,
+        tags: JSON.stringify(data.tags),
+        coverImage: data.coverImage,
+        description: data.description,
+        content: data.content,
+        images: JSON.stringify(data.images),
+        videoUrl: data.videoUrl || "",
+        prompts: JSON.stringify(data.prompts),
+        workflow: JSON.stringify(data.workflow),
+        summary: data.summary,
+        sections: JSON.stringify(data.sections ?? []),
+        featured: data.featured,
+        published: data.published,
+      },
+    });
+    return dbWorkToWork(work);
+  } catch (error) {
+    console.error("createWork Prisma error:", error);
+    throw error;
+  }
 }
 
 export async function updateWork(

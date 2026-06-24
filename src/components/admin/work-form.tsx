@@ -356,7 +356,8 @@ export function WorkForm({ work }: WorkFormProps) {
       }
       router.push("/admin/works");
       router.refresh();
-    } catch {
+    } catch (err) {
+      console.error("保存作品失败:", err);
       toast.error("保存失败，请重试");
     } finally {
       setSaving(false);
