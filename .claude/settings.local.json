@@ -51,7 +51,8 @@
       "WebFetch(domain:cooperative-vitality-production-83d0.up.railway.app)",
       "Bash(MSYS_NO_PATHCONV=1 railway up *)",
       "Bash(railway --help)",
-      "Bash(railway ssh *)"
+      "Bash(railway ssh *)",
+      "Bash(MSYS_NO_PATHCONV=1 railway variables *)"
     ]
   }
 }

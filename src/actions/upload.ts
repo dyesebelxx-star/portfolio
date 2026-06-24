@@ -9,6 +9,12 @@ function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+function uploadBaseDir(): string {
+  // UPLOAD_DIR env var for production (e.g. /data/uploads), fallback to public/uploads for local dev
+  if (process.env.UPLOAD_DIR) return process.env.UPLOAD_DIR;
+  return join(process.cwd(), "public", "uploads");
+}
+
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
 const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/ogg"];
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -30,7 +36,7 @@ export async function uploadImage(formData: FormData): Promise<{ url: string } |
 
   const ext = file.name.split(".").pop() || "jpg";
   const filename = `${generateId()}.${ext}`;
-  const dir = join(process.cwd(), "public", "uploads", "images");
+  const dir = join(uploadBaseDir(), "images");
   await mkdir(dir, { recursive: true });
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -55,7 +61,7 @@ export async function uploadVideo(formData: FormData): Promise<{ url: string } |
 
   const ext = file.name.split(".").pop() || "mp4";
   const filename = `${generateId()}.${ext}`;
-  const dir = join(process.cwd(), "public", "uploads", "videos");
+  const dir = join(uploadBaseDir(), "videos");
   await mkdir(dir, { recursive: true });
 
   const buffer = Buffer.from(await file.arrayBuffer());
@@ -80,7 +86,7 @@ export async function uploadCover(formData: FormData): Promise<{ url: string } |
 
   const ext = file.name.split(".").pop() || "jpg";
   const filename = `${generateId()}.${ext}`;
-  const dir = join(process.cwd(), "public", "uploads", "covers");
+  const dir = join(uploadBaseDir(), "covers");
   await mkdir(dir, { recursive: true });
 
   const buffer = Buffer.from(await file.arrayBuffer());
