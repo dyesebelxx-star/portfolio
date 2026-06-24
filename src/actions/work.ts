@@ -93,11 +93,21 @@ export async function getWorkById(id: string): Promise<Work | null> {
   return dbWorkToWork(work);
 }
 
+function cleanSlug(raw: string): string {
+  return raw
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9一-鿿-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export async function createWork(data: Omit<Work, "id" | "createdAt" | "updatedAt">) {
+  const slug = cleanSlug(data.slug) || Date.now().toString(36);
   try {
     const work = await prisma.work.create({
       data: {
-        slug: data.slug,
+        slug,
         title: data.title,
         type: data.type,
         category: data.category,
@@ -127,7 +137,7 @@ export async function updateWork(
   data: Partial<Omit<Work, "id" | "createdAt" | "updatedAt">>
 ) {
   const updateData: Record<string, unknown> = {};
-  if (data.slug !== undefined) updateData.slug = data.slug;
+  if (data.slug !== undefined) updateData.slug = cleanSlug(data.slug);
   if (data.title !== undefined) updateData.title = data.title;
   if (data.type !== undefined) updateData.type = data.type;
   if (data.category !== undefined) updateData.category = data.category;

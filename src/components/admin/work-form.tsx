@@ -83,12 +83,17 @@ export function WorkForm({ work }: WorkFormProps) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function generateSlug() {
-    const slug = form.title
+  function cleanSlug(raw: string) {
+    return raw
       .toLowerCase()
-      .replace(/[^a-z0-9一-龥]+/g, "-")
-      .replace(/^-|-$/g, "") ||
-      Date.now().toString(36);
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9一-龥-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+  }
+
+  function generateSlug() {
+    const slug = cleanSlug(form.title) || Date.now().toString(36);
     updateField("slug", slug);
   }
 
@@ -394,7 +399,7 @@ export function WorkForm({ work }: WorkFormProps) {
             <Input
               id="slug"
               value={form.slug}
-              onChange={(e) => updateField("slug", e.target.value)}
+              onChange={(e) => updateField("slug", cleanSlug(e.target.value))}
               placeholder="url-friendly-slug"
               required
             />

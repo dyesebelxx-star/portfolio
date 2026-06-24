@@ -3,9 +3,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clean existing data
-  await prisma.work.deleteMany();
-  await prisma.admin.deleteMany();
+  // Skip if already seeded
+  const existingAdmin = await prisma.admin.findFirst();
+  if (existingAdmin) {
+    console.log("✅ Database already seeded, skipping.");
+    return;
+  }
 
   // Create admin user
   await prisma.admin.create({

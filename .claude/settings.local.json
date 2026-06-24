@@ -45,7 +45,10 @@
       "Bash(railway whoami *)",
       "Bash(railway volume *)",
       "Bash(railway upgrade *)",
-      "Bash(npx *)"
+      "Bash(npx *)",
+      "Bash(MSYS_NO_PATHCONV=1 railway volume *)",
+      "Bash(railway shell *)",
+      "WebFetch(domain:cooperative-vitality-production-83d0.up.railway.app)"
     ]
   }
 }
