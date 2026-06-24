@@ -165,6 +165,19 @@ export async function deleteWork(id: string) {
   await prisma.work.delete({ where: { id } });
 }
 
+export async function fixAllSlugs() {
+  const works = await prisma.work.findMany();
+  let fixed = 0;
+  for (const w of works) {
+    const clean = cleanSlug(w.slug);
+    if (clean && clean !== w.slug) {
+      await prisma.work.update({ where: { id: w.id }, data: { slug: clean } });
+      fixed++;
+    }
+  }
+  return { fixed };
+}
+
 export async function getWorkStats() {
   const [total, published, videos, images, featured] = await Promise.all([
     prisma.work.count(),
